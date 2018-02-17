@@ -1,13 +1,4 @@
-// first display all of the items available for sale. Include the ids, names, and prices of products for sale.
-// The app should then prompt users with two messages.
-// The first should ask them the ID of the product they would like to buy.
-// The second message should ask how many units of the product they would like to buy.
-// check if your store has enough of the product to meet the customer's request.
-// If not, the app should log a phrase like `Insufficient quantity!`, and then prevent the order from going through.
-// 8. However, if your store _does_ have enough of the product, you should fulfill the customer's order.
-//    * This means updating the SQL database to reflect the remaining quantity.
-//    * Once the update goes through, show the customer the total cost of their purchase.
-// * item_id product_name department_name price stock_quantity
+
 const inq = require("inquirer");
 const mysql = require("mysql");
 const Table = require("tty-table");
@@ -38,8 +29,8 @@ function displayProduct () {
       let productTable = Table(header,res);
       console.log(productTable.render());
       numItems = res.length;
-      askCustomer();
-   
+      console.log(`num of different items: ${numItems}`)
+      askCustomer(); 
     })
 }
 
@@ -89,16 +80,24 @@ function askCustomer(){
     {
       name:"id",
       type:"input",
-      message: "what product would you like to purchase?"
+      message: "what product would you like to purchase (enter item_id)?",
+      validate: function validateGuess(id) {
+        let float = parseFloat(id)
+        return Number.isInteger(float) && float >= 0 && float <= numItems;
+      }
     },
     {
       name:"quantity",
       type:"input",
-      message: "how many?"
+      message: "how many?",
+      validate: function validateGuess(num) {
+        return Number.isInteger(parseFloat(num));
+      }
     },
-  ]).then(function(ans){
+  ]).then(ans => {
     query_id = ans.id;
     query_num = ans.quantity;
+    console.log(query_num, query_id)
     checkStock();
   
 
