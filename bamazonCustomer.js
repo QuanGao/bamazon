@@ -10,7 +10,10 @@
 // * item_id product_name department_name price stock_quantity
 const inq = require("inquirer");
 const mysql = require("mysql");
-const Table = require("tty-table")
+const Table = require("tty-table");
+let query_id;
+let query_num;
+let numItems;
 
 const connection = mysql.createConnection({
     host: "localhost",
@@ -23,7 +26,7 @@ const connection = mysql.createConnection({
   connection.connect(function(err) {
     if (err) throw err;
     console.log(`Welcome to the bamazon store!`);
-    checkStock();
+    displayProduct();
   });
 
 
@@ -33,13 +36,14 @@ function displayProduct () {
       if (err) throw err;
       let header = [{value:"item_id", width : 10}, {value:"product_name"}, {value:"price"}]
       let productTable = Table(header,res);
-      console.log(productTable.render()); 
-      connection.end();
+      console.log(productTable.render());
+      numItems = res.length;
+      askCustomer();
+   
     })
 }
 
-let query_id = 1;
-let query_num = 100;
+
 function checkStock () {
     console.log(`Checking if available`);
     connection.query(`SELECT price, stock_quantity FROM products WHERE item_id=${query_id}`, function(err, res) {
@@ -80,3 +84,24 @@ function Customer (itemId, units){
     this.itemId = itemId;
     this.units = units;
 }
+function askCustomer(){
+  inq.prompt([
+    {
+      name:"id",
+      type:"input",
+      message: "what product would you like to purchase?"
+    },
+    {
+      name:"quantity",
+      type:"input",
+      message: "how many?"
+    },
+  ]).then(function(ans){
+    query_id = ans.id;
+    query_num = ans.quantity;
+    checkStock();
+  
+
+  })
+}
+
