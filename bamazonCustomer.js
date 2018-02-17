@@ -2,8 +2,6 @@
 const inq = require("inquirer");
 const mysql = require("mysql");
 const Table = require("tty-table");
-let query_id;
-let query_num;
 let numItems;
 
 const connection = mysql.createConnection({
@@ -12,48 +10,81 @@ const connection = mysql.createConnection({
     user: "root",
     password: "",
     database: "bamazon"
-  });
+});
   
-  connection.connect(function(err) {
-    if (err) throw err;
-    console.log(`Welcome to the bamazon store!`);
-    displayProduct();
-  });
+connection.connect(function(err) {
+  if (err) throw err;
+  console.log(`
+  Welcome to the bamazon store!`);
+  start();
+});
 
-
-function displayProduct () {
-    console.log(`Here are our products for sale`);
-    connection.query(`SELECT item_id, product_name, price FROM products`, function(err, res) {
-      if (err) throw err;
-      let header = [{value:"item_id", width : 10}, {value:"product_name"}, {value:"price"}]
-      let productTable = Table(header,res);
-      console.log(productTable.render());
-      numItems = res.length;
-      console.log(`num of different items: ${numItems}`)
-      askCustomer(); 
-    })
+function Customer (query_id, query_num) {
+  this.query_id = query_id;
+  this.query_num = query_num;
 }
 
+function displayTable (res) {
+  let header = [{value:"item_id", width : 10}, {value:"product_name"}, {value:"price"}]
+  let productTable = Table(header,res);
+  console.log(productTable.render());
+  numItems = res.length;
+}
 
-function checkStock () {
-    console.log(`Checking if available`);
-    connection.query(`SELECT price, stock_quantity FROM products WHERE item_id=${query_id}`, function(err, res) {
+function start () {
+  console.log(`
+  Here are our products for sale:
+  `);
+  connection.query(`SELECT item_id, product_name, price FROM products`, function(err, res) {
     if (err) throw err;
-    let price = res[0].price;
-    let quant = res[0].stock_quantity;
-    if(query_num>quant){
-      console.log("insufficient quantity")
-    }else{
-      let totalPrice = price * query_num;
-      updateStock(query_id,(quant-query_num), totalPrice);
-    }
-
-
-    connection.end();
+    displayTable (res)
+    askCustomer(); 
   })
 }
 
-function updateStock (itemID,newQuantity, sum){
+function askCustomer(){
+  inq.prompt([
+    {
+      name:"id",
+      type:"input",
+      message: `
+  What product would you like to purchase (enter item_id)?`,
+      validate: function validateGuess(id) {
+        let float = parseFloat(id)
+        return Number.isInteger(float) && float > 0 && float <= numItems;
+      }
+    },
+    {
+      name:"quantity",
+      type:"input",
+      message: `
+  How many?`,
+      validate: function validateGuess(num) {
+        return Number.isInteger(parseFloat(num));
+      }
+    },
+  ]).then(ans => {
+    let customer = new Customer (ans.id, ans.quantity)
+    checkStock(customer);
+  })
+}
+function checkStock (customer) {
+    connection.query(`SELECT price, stock_quantity FROM products WHERE item_id=${customer.query_id}`, function(err, res) {
+    if (err) throw err;
+    console.log(res)
+    let price = res[0].price;
+    let quant = res[0].stock_quantity;
+    if(query_num>customer.query_id){
+      console.log("insufficient quantity")
+    }else{
+      let totalPrice = price * customer.query_num;
+      let newStockQuant = quant - customer.query_num;
+      updateStock(customer.query_id, newStockQuant, totalPrice);
+    }
+  })
+}
+
+function updateStock (itemID, newQuantity, sum){
   connection.query(
     "UPDATE products SET ? WHERE ?",
     [
@@ -65,42 +96,11 @@ function updateStock (itemID,newQuantity, sum){
       }
     ],function(err, res){
       if(err) throw err;
-      console.log(`updated item: ${itemID} with new stock_quantity ${newQuantity}`)
-      console.log(`your total is ${sum}`)
-
+      console.log(`Your total is ${sum}`);
+      connection.end();
     }
   )
 }
-function Customer (itemId, units){
-    this.itemId = itemId;
-    this.units = units;
-}
-function askCustomer(){
-  inq.prompt([
-    {
-      name:"id",
-      type:"input",
-      message: "what product would you like to purchase (enter item_id)?",
-      validate: function validateGuess(id) {
-        let float = parseFloat(id)
-        return Number.isInteger(float) && float >= 0 && float <= numItems;
-      }
-    },
-    {
-      name:"quantity",
-      type:"input",
-      message: "how many?",
-      validate: function validateGuess(num) {
-        return Number.isInteger(parseFloat(num));
-      }
-    },
-  ]).then(ans => {
-    query_id = ans.id;
-    query_num = ans.quantity;
-    console.log(query_num, query_id)
-    checkStock();
-  
 
-  })
-}
+
 
