@@ -8,7 +8,7 @@ const connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
     user: "root",
-    password: "",
+    password: "yllen",
     database: "bamazon"
 });
   
@@ -60,7 +60,7 @@ function askCustomer(){
       message: `
   How many?`,
       validate: function validateGuess(num) {
-        return Number.isInteger(parseFloat(num));
+        return Number.isInteger(parseFloat(num)) && parseFloat(num) >0;
       }
     },
   ]).then(ans => {
@@ -71,12 +71,14 @@ function askCustomer(){
 function checkStock (customer) {
     connection.query(`SELECT price, stock_quantity FROM products WHERE item_id=${customer.query_id}`, function(err, res) {
     if (err) throw err;
-    console.log(res)
     let price = res[0].price;
     let quant = res[0].stock_quantity;
-    if(query_num>customer.query_id){
-      console.log("insufficient quantity")
-    }else{
+    if (customer.query_num > quant){
+      console.log(`
+  insufficient quantity
+      `);
+      connection.end();
+    } else {
       let totalPrice = price * customer.query_num;
       let newStockQuant = quant - customer.query_num;
       updateStock(customer.query_id, newStockQuant, totalPrice);
@@ -96,7 +98,9 @@ function updateStock (itemID, newQuantity, sum){
       }
     ],function(err, res){
       if(err) throw err;
-      console.log(`Your total is ${sum}`);
+      console.log(`
+  Your total is ${sum}
+      `);
       connection.end();
     }
   )
