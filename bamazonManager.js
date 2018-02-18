@@ -6,6 +6,12 @@
 const inq = require("inquirer");
 const mysql = require("mysql");
 const Table = require("tty-table");
+function Product(name, price, quantity, department) {
+    this.product_name = name;
+    this.department_name = department;
+    this.price = price;
+    this.stock_quantity = quantity;
+}
 
 const connection = mysql.createConnection({
     host: "localhost",
@@ -21,7 +27,7 @@ connection.connect(function (err) {
     // chooseTask();
     // readInventory()
     // readInventory(addStock)
-    addNewProduct();
+    readInventory(inquireNewProduct);
 
 
 });
@@ -85,7 +91,7 @@ let displayTable = function (res) {
 
 let displayInventory = function (res) {
     console.log(`Here's the full inventory:`);
-                        
+
     displayTable(res)
 }
 
@@ -133,79 +139,107 @@ let findLowStock = function () {
     })
 }
 
-let updateQuant = function (id, num) {
-        let query = connection.query(
-            `UPDATE products SET stock_quantity = stock_quantity+${num} WHERE ?`, [
-                {
-                    item_id: id
-                }
-            ],
-            function (err, res) {
-                console.log("updated")
-                readInventory(displayInventory)
-            })
-        }
-
-function Product (name, price, quantity, department){
-    this.product_name = name;
-    this.department_name = department;
-    this.price = price;
-    this.stock_quantity = quantity;
+let rmDup = function(arr){
+    let obj = [];
+    arr.forEach(a=>{obj[a] = 0});
+    return Object.keys(obj)
 }
-let addNewProduct = function () {
-    inq.prompt([
-    {
-        name: "itemName",
-        message: "What new product would you like to add?",
-        type: "input",
 
-    },
-    {
-        name: "itemPrice",
-        message: "What is the price tag?",
-        type: "input",
-
-    },
-    {
-        name: "itemQuant",
-        message: "How many would like to stock?",
-        type: "input",
-        validate: function (num) {
-            return Number.isInteger(Number(num)) && Number(num) > 0;
-        }
-    },
-    {
-        name: "itemDepart",
-        message: "What department would this product be in?",
-        type: "input"
-    }
-
-]).then(function (ans) {
-    let newProduct = new Product (ans.itemName, ans.itemPrice, ans.itemQuant, ans.itemDepart)
-    console.log(newProduct)
+let updateQuant = function (id, num) {
     let query = connection.query(
-        "INSERT INTO products SET ?",
-        newProduct
-        ,
-        function(err, res) {
-          console.log("added");
-          readInventory(displayInventory)
-         
+        `UPDATE products SET stock_quantity = stock_quantity+${num} WHERE ?`, [{
+            item_id: id
+        }],
+        function (err, res) {
+            console.log("updated")
+            readInventory(displayInventory)
+        })
+}
+
+
+let inquireNewProduct = function (res) {
+    let existingProducts = res.map(item => {
+        return item.product_name.toUpperCase();
+    });
+    let departments = res.map(item => {
+        return item.department_name;
+    });
+    let existingDepart = rmDup(departments);
+
+    existingDepart.push("New department");
+   
+    inq.prompt([{
+            name: "itemName",
+            message: "What new product would you like to add?",
+            type: "input",
+            validate: function(item){
+                return existingProducts.indexOf(item.toUpperCase()) === -1               
+            }
+
+        },
+        {
+            name: "itemPrice",
+            message: "What is the price tag?",
+            type: "input",
+
+        },
+        {
+            name: "itemQuant",
+            message: "How many would like to stock?",
+            type: "input",
+            validate: function (num) {
+                return Number.isInteger(Number(num)) && Number(num) > 0;
+            }
+        }
+    ]).then(function(ans){
+        let newProduct = new Product(ans.itemName, ans.itemPrice, ans.itemQuant, "");
+        inq.prompt([
+        {
+            name: "itemDepart",
+            message: "What department would this product be in?",
+            type: "list",
+            choices: existingDepart
+        }
+
+        ]).then(function(res){
+            if(res.itemDepart === "New department"){
+                inq.prompt([
+                    {
+                        name: "newDepart",
+                        message: "What new department would this product be in?",
+                        type: "input",
+                    }
+                ]).then(function(depart){
+                    newProduct.department_name = depart.newDepart;
+                    addNewProduct(newProduct)
+                })
+
+            } else {
+                newProduct.department_name = res.itemDepart;
+                addNewProduct(newProduct)
+            }
         })
     })
 }
 
+let addNewProduct = function (newProduct) {
+    let query = connection.query(
+        "INSERT INTO products SET ?",
+        newProduct,
+        function (err, res) {
+            readInventory(displayInventory)
+        })
+}
 
 
+// function Manager() {
+//     this.viewInventory= function () {
+//     };
+//     this.findLowStock = function () {};
+//     this.addStock = function () {
 
-        // function Manager() {
-        //     this.viewInventory= function () {
-        //     };
-        //     this.findLowStock = function () {};
-        //     this.addStock = function () {
+//     };
+//     this.addNewProduct = function () {
 
-        //     };
-        //     this.addNewProduct = function () {
-
-        //     }
-        // }
+//     }
+// }
