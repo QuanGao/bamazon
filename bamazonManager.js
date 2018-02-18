@@ -1,17 +1,8 @@
-//   * List a set of menu options:View Products for Sale;View Low Inventory;Add to Inventory ;Add New Product
-//   * If a manager selects `View Products for Sale`, the app should list every available item: the item IDs, names, prices, and quantities.
-//   * If a manager selects `View Low Inventory`, then it should list all items with an inventory count lower than five.
-//   * If a manager selects `Add to Inventory`, your app should display a prompt that will let the manager "add more" of any item currently in the store.
-//   * If a manager selects `Add New Product`, it should allow the manager to add a completely new product to the store.
 const inq = require("inquirer");
+
 const mysql = require("mysql");
+
 const Table = require("tty-table");
-function Product(name, price, quantity, department) {
-    this.product_name = name;
-    this.department_name = department;
-    this.price = price;
-    this.stock_quantity = quantity;
-}
 
 const connection = mysql.createConnection({
     host: "localhost",
@@ -21,48 +12,36 @@ const connection = mysql.createConnection({
     database: "bamazon"
 });
 
-connection.connect(function (err) {
-    if (err) throw err;
-    console.log(`connected!`);
-    // chooseTask();
-    // readInventory()
-    // readInventory(addStock)
-    readInventory(inquireNewProduct);
+function Product(name, price, quantity, department) {
+    this.product_name = name;
+    this.department_name = department;
+    this.price = price;
+    this.stock_quantity = quantity;
+}
 
+let rmDup = function (arr) {
+    let obj = [];
+    arr.forEach(a => {
+        obj[a] = 0
+    });
+    return Object.keys(obj)
+}
 
-});
-
-let chooseTask = function () {
-    inq.prompt([{
-        name: "task",
-        type: "list",
-        message: "What would you like to do boss?",
-        choices: ["View Products for Sale", "View Low Inventory", "Add to Inventory", "Add New Product", "Done for now"]
-
-    }]).then(function (ans) {
-        switch (ans.task) {
-            case "View Products for Sale":
-                viewInventory();
-                break;
-            case "View Low Inventory":
-                findLowStock();
-                break;
-            case "Add to Inventory":
-                addStock();
-                break;
-            case "Add New Product":
-                addNewProduct();
-                break;
-            case "Done for now":
-                connection.end();
-                break;
-            default:
-                return;
-        }
+let readInventory = function (cb) {
+    connection.query(`SELECT * FROM products`, function (err, res) {
+        if (err) throw err;
+        cb(res);
     })
 }
 
+let displayInventory = function (res) {
+    console.log(`
 
+    Here's the full inventory:`);
+    displayTable(res);
+    chooseTask();
+
+}
 
 let displayTable = function (res) {
     let header = [{
@@ -79,26 +58,14 @@ let displayTable = function (res) {
     console.log(productTable.render());
 }
 
-// let viewInventory = function () {
-//     connection.query(`SELECT * FROM products`, function (err, res) {
-//         if (err) throw err;
-//         console.log(`
-//         Here's the full inventory:
-//         `);
-//         displayTable(res)
-//     })
-// }
-
-let displayInventory = function (res) {
-    console.log(`Here's the full inventory:`);
-
-    displayTable(res)
-}
-
-let readInventory = function (cb) {
-    connection.query(`SELECT * FROM products`, function (err, res) {
+let findLowStock = function () {
+    console.log(`
+    Here are items that have less than 5 left in the inventory:':
+    `);
+    connection.query(`SELECT * FROM products WHERE stock_quantity < 5`, function (err, res) {
         if (err) throw err;
-        cb(res);
+        displayTable(res);
+        chooseTask();
     })
 }
 
@@ -124,25 +91,8 @@ let addStock = function (res) {
     ]).then(function (ans) {
         let id_stockUp = ans.stockUp.split(":")[0];
         let num_stockUp = parseInt(ans.quant);
-        console.log(id_stockUp, num_stockUp);
         updateQuant(id_stockUp, num_stockUp);
     })
-}
-
-let findLowStock = function () {
-    console.log(`
-    Here are items that have less than 5 left in the inventory:':
-    `);
-    connection.query(`SELECT * FROM products WHERE stock_quantity < 100`, function (err, res) {
-        if (err) throw err;
-        displayTable(res)
-    })
-}
-
-let rmDup = function(arr){
-    let obj = [];
-    arr.forEach(a=>{obj[a] = 0});
-    return Object.keys(obj)
 }
 
 let updateQuant = function (id, num) {
@@ -151,36 +101,38 @@ let updateQuant = function (id, num) {
             item_id: id
         }],
         function (err, res) {
-            console.log("updated")
-            readInventory(displayInventory)
+            chooseTask();
         })
 }
-
 
 let inquireNewProduct = function (res) {
     let existingProducts = res.map(item => {
         return item.product_name.toUpperCase();
     });
+
     let departments = res.map(item => {
         return item.department_name;
     });
+
     let existingDepart = rmDup(departments);
 
     existingDepart.push("New department");
-   
+
     inq.prompt([{
             name: "itemName",
             message: "What new product would you like to add?",
             type: "input",
-            validate: function(item){
-                return existingProducts.indexOf(item.toUpperCase()) === -1               
+            validate: function (item) {
+                return existingProducts.indexOf(item.toUpperCase()) === -1
             }
-
         },
         {
             name: "itemPrice",
             message: "What is the price tag?",
             type: "input",
+            validate: function (num) {
+                return Number(num) > 0;
+            }
 
         },
         {
@@ -191,34 +143,32 @@ let inquireNewProduct = function (res) {
                 return Number.isInteger(Number(num)) && Number(num) > 0;
             }
         }
-    ]).then(function(ans){
-        let newProduct = new Product(ans.itemName, ans.itemPrice, ans.itemQuant, "");
-        inq.prompt([
-        {
-            name: "itemDepart",
-            message: "What department would this product be in?",
-            type: "list",
-            choices: existingDepart
-        }
+    ]).then(function (ans) {
+        let newProduct = new Product(ans.itemName, parseFloat(ans.itemPrice), parseInt(ans.itemQuant), "");
+        getDepartmentInfo(existingDepart, newProduct)
+    })
+}
 
-        ]).then(function(res){
-            if(res.itemDepart === "New department"){
-                inq.prompt([
-                    {
-                        name: "newDepart",
-                        message: "What new department would this product be in?",
-                        type: "input",
-                    }
-                ]).then(function(depart){
-                    newProduct.department_name = depart.newDepart;
-                    addNewProduct(newProduct)
-                })
-
-            } else {
-                newProduct.department_name = res.itemDepart;
+let getDepartmentInfo = function (existingDepart, newProduct) {
+    inq.prompt([{
+        name: "itemDepart",
+        message: "What department would this product be in?",
+        type: "list",
+        choices: existingDepart
+    }]).then(function (res) {
+        if (res.itemDepart === "New department") {
+            inq.prompt([{
+                name: "newDepart",
+                message: "What new department would this product be in?",
+                type: "input",
+            }]).then(function (depart) {
+                newProduct.department_name = depart.newDepart;
                 addNewProduct(newProduct)
-            }
-        })
+            })
+        } else {
+            newProduct.department_name = res.itemDepart;
+            addNewProduct(newProduct)
+        }
     })
 }
 
@@ -227,19 +177,42 @@ let addNewProduct = function (newProduct) {
         "INSERT INTO products SET ?",
         newProduct,
         function (err, res) {
-            readInventory(displayInventory)
+            chooseTask();
         })
 }
 
 
-// function Manager() {
-//     this.viewInventory= function () {
-//     };
-//     this.findLowStock = function () {};
-//     this.addStock = function () {
+let chooseTask = function () {
+    inq.prompt([{
+        name: "task",
+        type: "list",
+        message: "What would you like to do?",
+        choices: ["View Products for Sale", "View Low Inventory", "Add to Inventory", "Add New Product", "Done for now"]
 
-//     };
-//     this.addNewProduct = function () {
+    }]).then(function (ans) {
+        switch (ans.task) {
+            case "View Products for Sale":
+                readInventory(displayInventory);
+                break;
+            case "View Low Inventory":
+                findLowStock();
+                break;
+            case "Add to Inventory":
+                readInventory(addStock)
+                break;
+            case "Add New Product":
+                readInventory(inquireNewProduct);
+                break;
+            case "Done for now":
+                connection.end();
+                break;
+            default:
+                return;
+        }
+    })
+}
 
-//     }
-// }
+connection.connect(function (err) {
+    if (err) throw err;
+    chooseTask();
+});
