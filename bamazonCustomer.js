@@ -54,9 +54,8 @@ function askCustomer() {
       type: "input",
       message: `
   What product would you like to purchase (enter item_id)?`,
-      validate: function (id) {
-        let float = parseFloat(id)
-        return Number.isInteger(float) && float > 0 && float <= numItems;
+      validate: function (id) { 
+        return Number.isInteger(Number(id)) && Number(id) > 0 && Number(id) <= numItems;
       }
     },
     {
@@ -65,11 +64,11 @@ function askCustomer() {
       message: `
   How many?`,
       validate: function(num) {
-        return Number.isInteger(parseFloat(num)) && parseFloat(num) > 0;
+        return Number.isInteger(Number(num)) && Number(num) > 0;
       }
     },
   ]).then(ans => {
-    let customer = new Customer(ans.id, ans.quantity)
+    let customer = new Customer(parseInt(ans.id), parseInt(ans.quantity))
     checkStock(customer);
   })
 }

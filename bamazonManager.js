@@ -11,7 +11,7 @@ const connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
     user: "root",
-    password: "",
+    password: "yllen",
     database: "bamazon"
 });
 
@@ -83,8 +83,8 @@ let displayTable = function (res) {
 // }
 
 let displayInventory = function (res) {
-    console.log(`
-                        Here's the full inventory:`);
+    console.log(`Here's the full inventory:`);
+                        
     displayTable(res)
 }
 
@@ -110,13 +110,13 @@ let addStock = function (res) {
             message: "How many would like to add?",
             type: "input",
             validate: function (num) {
-                return Number.isInteger(parseFloat(num)) && parseFloat(num) > 0;
+                return Number.isInteger(Number(num)) && Number(num) > 0;
             }
         }
 
     ]).then(function (ans) {
         let id_stockUp = ans.stockUp.split(":")[0];
-        let num_stockUp = ans.quant;
+        let num_stockUp = parseInt(ans.quant);
         console.log(id_stockUp, num_stockUp);
         updateQuant(id_stockUp, num_stockUp);
 
