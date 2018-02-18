@@ -20,7 +20,8 @@ connection.connect(function (err) {
     console.log(`connected!`);
     // chooseTask();
     // readInventory()
-    readInventory(addStock)
+    // readInventory(addStock)
+    addNewProduct();
 
 
 });
@@ -119,9 +120,6 @@ let addStock = function (res) {
         let num_stockUp = parseInt(ans.quant);
         console.log(id_stockUp, num_stockUp);
         updateQuant(id_stockUp, num_stockUp);
-
-
-
     })
 }
 
@@ -136,19 +134,66 @@ let findLowStock = function () {
 }
 
 let updateQuant = function (id, num) {
-        var query = connection.query(
+        let query = connection.query(
             `UPDATE products SET stock_quantity = stock_quantity+${num} WHERE ?`, [
                 {
                     item_id: id
                 }
             ],
             function (err, res) {
+                console.log("updated")
                 readInventory(displayInventory)
             })
         }
 
+function Product (name, price, quantity, department){
+    this.product_name = name;
+    this.department_name = department;
+    this.price = price;
+    this.stock_quantity = quantity;
+}
+let addNewProduct = function () {
+    inq.prompt([
+    {
+        name: "itemName",
+        message: "What new product would you like to add?",
+        type: "input",
 
-let addNewProduct = function () {}
+    },
+    {
+        name: "itemPrice",
+        message: "What is the price tag?",
+        type: "input",
+
+    },
+    {
+        name: "itemQuant",
+        message: "How many would like to stock?",
+        type: "input",
+        validate: function (num) {
+            return Number.isInteger(Number(num)) && Number(num) > 0;
+        }
+    },
+    {
+        name: "itemDepart",
+        message: "What department would this product be in?",
+        type: "input"
+    }
+
+]).then(function (ans) {
+    let newProduct = new Product (ans.itemName, ans.itemPrice, ans.itemQuant, ans.itemDepart)
+    console.log(newProduct)
+    let query = connection.query(
+        "INSERT INTO products SET ?",
+        newProduct
+        ,
+        function(err, res) {
+          console.log("added");
+          readInventory(displayInventory)
+         
+        })
+    })
+}
 
 
 
