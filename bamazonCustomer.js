@@ -14,7 +14,7 @@ const connection = mysql.createConnection({
 connection.connect(function (err) {
   if (err) throw err;
   console.log(`
-  Welcome to the bamazon store!`);
+    Welcome to the bamazon store!`);
   start();
 });
 
@@ -54,7 +54,7 @@ function askCustomer() {
       type: "input",
       message: `
   What product would you like to purchase (enter item_id)?`,
-      validate: function (id) { 
+      validate: function (id) {
         return Number.isInteger(Number(id)) && Number(id) > 0 && Number(id) <= numItems;
       }
     },
@@ -63,7 +63,7 @@ function askCustomer() {
       type: "input",
       message: `
   How many?`,
-      validate: function(num) {
+      validate: function (num) {
         return Number.isInteger(Number(num)) && Number(num) > 0;
       }
     },
@@ -74,10 +74,11 @@ function askCustomer() {
 }
 
 function checkStock(customer) {
-  connection.query(`SELECT price, stock_quantity FROM products WHERE item_id=${customer.query_id}`, function (err, res) {
+  connection.query(`SELECT price, stock_quantity, product_sales FROM products WHERE item_id=${customer.query_id}`, function (err, res) {
     if (err) throw err;
     let price = res[0].price;
     let quant = res[0].stock_quantity;
+    let sales = res[0].product_sales;
     if (customer.query_num > quant) {
       console.log(`
   insufficient quantity
@@ -86,15 +87,16 @@ function checkStock(customer) {
     } else {
       let totalPrice = price * customer.query_num;
       let newStockQuant = quant - customer.query_num;
-      updateStock(customer.query_id, newStockQuant, totalPrice);
+      updateStock(customer.query_id, newStockQuant, totalPrice, sales);
     }
   })
 }
 
-function updateStock(itemID, newQuantity, sum) {
+function updateStock(itemID, newQuantity, sum, sales) {
   connection.query(
-  "UPDATE products SET ? WHERE ?", [{
-        stock_quantity: newQuantity
+    "UPDATE products SET ? WHERE ?", [{
+        stock_quantity: newQuantity,
+        product_sales: sales + sum
       },
       {
         item_id: itemID
