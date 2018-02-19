@@ -29,11 +29,29 @@ function Department(name, costs) {
     this.department_name = name;
     this.over_head_costs = costs;
 }
-let inquireNewDepart = function () {
+
+let createNewDepartment = function (res) {
+    let existingDepart = res.map(item => {
+        return (item.department_name).toLowerCase();
+     });
+     inquireNewDepart(existingDepart)
+}
+
+let readDepartment = function (cb) {
+    connection.query(`SELECT * FROM department`, function (err, res) {
+        if (err) throw err;
+        cb(res);
+    })
+}
+
+let inquireNewDepart = function (existingDepart) {
     inq.prompt([{
             name: "name",
             message: "What new department would you like to add?",
-            type: "input"
+            type: "input",
+            validate: function (name) {
+                return existingDepart.indexOf(name.toLowerCase()) === -1;
+            }
         },
         {
             name: "costs",
@@ -78,7 +96,7 @@ let chooseTask = function () {
         name: "task",
         type: "list",
         message: "What would you like to do?",
-        choices: ["View Product Sales by Department", "Create New Department"]
+        choices: ["View Product Sales by Department", "Create New Department",  "Done for now"]
 
     }]).then(function (ans) {
         switch (ans.task) {
@@ -86,7 +104,7 @@ let chooseTask = function () {
                 salesByDepart();
                 break;
             case "Create New Department":
-                inquireNewDepart()
+                readDepartment(createNewDepartment)
                 break;
             case "Done for now":
                 connection.end();
