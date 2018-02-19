@@ -17,14 +17,7 @@ function Product(name, price, quantity, department) {
     this.department_name = department;
     this.price = price;
     this.stock_quantity = quantity;
-}
-
-let rmDup = function (arr) {
-    let obj = [];
-    arr.forEach(a => {
-        obj[a] = 0
-    });
-    return Object.keys(obj)
+    this.product_sales = 0;
 }
 
 let readInventory = function (cb) {
@@ -105,19 +98,20 @@ let updateQuant = function (id, num) {
         })
 }
 
-let inquireNewProduct = function (res) {
+let createNewProduct = function (res) {
     let existingProducts = res.map(item => {
         return item.product_name.toUpperCase();
     });
+    connection.query(`SELECT department_name FROM department`, function (err, res) {
+        if (err) throw err;
+        let existingDepart = res.map(item => {
+                return item.department_name;
+             });
+        inquireNewProduct(existingProducts, existingDepart) 
+    })
+}
 
-    let departments = res.map(item => {
-        return item.department_name;
-    });
-
-    let existingDepart = rmDup(departments);
-
-    existingDepart.push("New department");
-
+let inquireNewProduct = function (existingProducts, existingDepart) {
     inq.prompt([{
             name: "itemName",
             message: "What new product would you like to add?",
@@ -142,33 +136,17 @@ let inquireNewProduct = function (res) {
             validate: function (num) {
                 return Number.isInteger(Number(num)) && Number(num) > 0;
             }
+        },
+        {
+            name: "itemDepart",
+            message: "What department would this new product be in?",
+            type: "list",
+            choices: existingDepart
         }
-    ]).then(function (ans) {
-        let newProduct = new Product(ans.itemName, parseFloat(ans.itemPrice), parseInt(ans.itemQuant), "");
-        getDepartmentInfo(existingDepart, newProduct)
-    })
-}
 
-let getDepartmentInfo = function (existingDepart, newProduct) {
-    inq.prompt([{
-        name: "itemDepart",
-        message: "What department would this product be in?",
-        type: "list",
-        choices: existingDepart
-    }]).then(function (res) {
-        if (res.itemDepart === "New department") {
-            inq.prompt([{
-                name: "newDepart",
-                message: "What new department would this product be in?",
-                type: "input",
-            }]).then(function (depart) {
-                newProduct.department_name = depart.newDepart;
-                addNewProduct(newProduct)
-            })
-        } else {
-            newProduct.department_name = res.itemDepart;
-            addNewProduct(newProduct)
-        }
+    ]).then(function (ans) {
+        let newProduct = new Product(ans.itemName, parseFloat(ans.itemPrice), parseInt(ans.itemQuant), ans.itemDepart);
+        addNewProduct(newProduct)
     })
 }
 
@@ -180,7 +158,6 @@ let addNewProduct = function (newProduct) {
             chooseTask();
         })
 }
-
 
 let chooseTask = function () {
     inq.prompt([{
@@ -201,7 +178,7 @@ let chooseTask = function () {
                 readInventory(addStock)
                 break;
             case "Add New Product":
-                readInventory(inquireNewProduct);
+                readInventory(createNewProduct);
                 break;
             case "Done for now":
                 connection.end();
