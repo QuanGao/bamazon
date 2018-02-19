@@ -7,7 +7,7 @@ const connection = mysql.createConnection({
   host: "localhost",
   port: 3306,
   user: "root",
-  password: "yllen",
+  password: "",
   database: "bamazon"
 });
 
@@ -74,11 +74,10 @@ function askCustomer() {
 }
 
 function checkStock(customer) {
-  connection.query(`SELECT price, stock_quantity, product_sales FROM products WHERE item_id=${customer.query_id}`, function (err, res) {
+  connection.query(`SELECT price, stock_quantity FROM products WHERE item_id=${customer.query_id}`, function (err, res) {
     if (err) throw err;
     let price = res[0].price;
     let quant = res[0].stock_quantity;
-    let sales = res[0].product_sales;
     if (customer.query_num > quant) {
       console.log(`
   insufficient quantity
@@ -87,16 +86,15 @@ function checkStock(customer) {
     } else {
       let totalPrice = price * customer.query_num;
       let newStockQuant = quant - customer.query_num;
-      updateStock(customer.query_id, newStockQuant, totalPrice, sales);
+      updateStock(customer.query_id, newStockQuant, totalPrice);
     }
   })
 }
 
-function updateStock(itemID, newQuantity, sum, sales) {
+function updateStock(itemID, newQuantity, sum) {
   connection.query(
   "UPDATE products SET ? WHERE ?", [{
-        stock_quantity: newQuantity,
-        product_sales: sales + sum
+        stock_quantity: newQuantity
       },
       {
         item_id: itemID
