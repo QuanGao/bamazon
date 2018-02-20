@@ -1,4 +1,4 @@
-const inq = require("inquirer");
+const inquirer = require("inquirer");
 const mysql = require("mysql");
 const Table = require("tty-table");
 let numItems;
@@ -14,7 +14,7 @@ const connection = mysql.createConnection({
 connection.connect(function (err) {
   if (err) throw err;
   console.log(`
-    Welcome to the bamazon store!`);
+  Welcome to the bamazon store!`);
   start();
 });
 
@@ -49,7 +49,7 @@ function start() {
 }
 
 function askCustomer() {
-  inq.prompt([{
+  inquirer.prompt([{
       name: "id",
       type: "input",
       message: `

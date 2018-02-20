@@ -1,4 +1,4 @@
-const inq = require("inquirer");
+const inquirer = require("inquirer");
 
 const mysql = require("mysql");
 
@@ -20,14 +20,14 @@ function Product(name, price, quantity, department) {
     this.product_sales = 0;
 }
 
-let readInventory = function (cb) {
+const readInventory = function (cb) {
     connection.query(`SELECT * FROM products`, function (err, res) {
         if (err) throw err;
         cb(res);
     })
 }
 
-let displayInventory = function (res) {
+const displayInventory = function (res) {
     console.log(`
 
     Here's the full inventory:`);
@@ -36,7 +36,7 @@ let displayInventory = function (res) {
 
 }
 
-let displayTable = function (res) {
+const displayTable = function (res) {
     let header = [{
         value: "item_id",
         width: 10
@@ -51,7 +51,7 @@ let displayTable = function (res) {
     console.log(productTable.render());
 }
 
-let findLowStock = function () {
+const findLowStock = function () {
     console.log(`
     Here are items that have less than 5 left in the inventory:':
     `);
@@ -62,11 +62,11 @@ let findLowStock = function () {
     })
 }
 
-let addStock = function (res) {
+const addStock = function (res) {
     let products = res.map(item => {
         return `${item.item_id}:${item.product_name}`
     })
-    inq.prompt([{
+    inquirer.prompt([{
             name: "stockUp",
             message: "What product would you like to stock more?",
             type: "list",
@@ -88,7 +88,7 @@ let addStock = function (res) {
     })
 }
 
-let updateQuant = function (id, num) {
+const updateQuant = function (id, num) {
     let query = connection.query(
         `UPDATE products SET stock_quantity = stock_quantity+${num} WHERE ?`, [{
             item_id: id
@@ -98,7 +98,7 @@ let updateQuant = function (id, num) {
         })
 }
 
-let createNewProduct = function (res) {
+const createNewProduct = function (res) {
     let existingProducts = res.map(item => {
         return item.product_name.toUpperCase();
     });
@@ -111,8 +111,8 @@ let createNewProduct = function (res) {
     })
 }
 
-let inquireNewProduct = function (existingProducts, existingDepart) {
-    inq.prompt([{
+const inquireNewProduct = function (existingProducts, existingDepart) {
+    inquirer.prompt([{
             name: "itemName",
             message: "What new product would you like to add?",
             type: "input",
@@ -150,7 +150,7 @@ let inquireNewProduct = function (existingProducts, existingDepart) {
     })
 }
 
-let addNewProduct = function (newProduct) {
+const addNewProduct = function (newProduct) {
     let query = connection.query(
         "INSERT INTO products SET ?",
         newProduct,
@@ -159,8 +159,8 @@ let addNewProduct = function (newProduct) {
         })
 }
 
-let chooseTask = function () {
-    inq.prompt([{
+const chooseTask = function () {
+    inquirer.prompt([{
         name: "task",
         type: "list",
         message: "What would you like to do?",

@@ -1,4 +1,4 @@
-const inq = require("inquirer");
+const inquirer = require("inquirer");
 
 const mysql = require("mysql");
 
@@ -17,22 +17,22 @@ function Department(name, costs) {
     this.over_head_costs = costs;
 }
 
-let createNewDepartment = function (res) {
+const createNewDepartment = function (res) {
     let existingDepart = res.map(item => {
         return (item.department_name).toLowerCase();
     });
     inquireNewDepart(existingDepart)
 }
 
-let readDepartment = function (cb) {
+const readDepartment = function (cb) {
     connection.query(`SELECT * FROM department`, function (err, res) {
         if (err) throw err;
         cb(res);
     })
 }
 
-let inquireNewDepart = function (existingDepart) {
-    inq.prompt([{
+const inquireNewDepart = function (existingDepart) {
+    inquirer.prompt([{
             name: "name",
             message: "What new department would you like to add?",
             type: "input",
@@ -59,7 +59,7 @@ let inquireNewDepart = function (existingDepart) {
     })
 };
 
-let displayTable = function (res) {
+const displayTable = function (res) {
     let header = [{
         value: "department_id",
         width: 16
@@ -76,7 +76,7 @@ let displayTable = function (res) {
     console.log(productTable.render());
 }
 
-let sumSalesByDepart = function () {
+const sumSalesByDepart = function () {
     connection.query(`
     SELECT department.*, IFNULL(product_sales,"0") AS product_sales, (IFNULL(product_sales,0) - over_head_costs) AS total_profit
     FROM  department
@@ -90,8 +90,8 @@ let sumSalesByDepart = function () {
     )
 }
 
-let chooseTask = function () {
-    inq.prompt([{
+const chooseTask = function () {
+    inquirer.prompt([{
         name: "task",
         type: "list",
         message: "What would you like to do?",
