@@ -5,9 +5,16 @@
 * For the store manager, the app allows you to (1) view the complete inventory (2) view products that have low inventory count (3) add more stock to existing products in the inventory (4) add new product to the store
 * For the store supervisor, the app allows you to (1) view sales information for all departments of the store (2) add new department
 
-### customers
+### When customers order products
 
-IF there's enough stock, return total price
+###### Bamazon returns the total price :
+
 ![customer order productt](./gifs/1.gif)
-IF not, return insufficient stock
+
+###### Bamazon informs customers if there isn't enough products in stock
+
 ![customer order productt](./gifs/2.gif)
+
+### The manager can choose to view the complete inventory:
+
+###### Bamazon returns the total price :
