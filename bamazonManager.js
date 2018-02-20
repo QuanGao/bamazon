@@ -53,7 +53,7 @@ const displayTable = function (res) {
 
 const findLowStock = function () {
     console.log(`
-    Here are items that have less than 5 left in the inventory:':
+    Here are items that have less than 5 left in the inventory:
     `);
     connection.query(`SELECT * FROM products WHERE stock_quantity < 5`, function (err, res) {
         if (err) throw err;
