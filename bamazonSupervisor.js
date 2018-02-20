@@ -75,7 +75,7 @@ let inquireNewDepart = function (existingDepart) {
 let displayTable = function (res) {
     let header = [{
         value: "department_id",
-        width: 10
+        width: 16
     }, {
         value: "department_name"
     }, {
@@ -91,38 +91,17 @@ let displayTable = function (res) {
 
 let sumSalesByDepart = function () {
     connection.query(`
-    CREATE TABLE table_1
-    SELECT department_name, sum(product_sales) AS product_sales FROM products GROUP BY department_name`,
-        function (err, res) {
-            if (err) throw err;
-            joinSalesWithDepart()
-
-        }
-    )
-}
-
-let joinSalesWithDepart = function () {
-    connection.query(`
-    CREATE TABLE table_2
-    SELECT  *
-    FROM department
-    LEFT JOIN table_1 USING (department_name)`,
-        function (err, res) {
-            if (err) throw err;
-            calculateProfit();
-        }
-    )
-}
-
-let calculateProfit = function () {
-    connection.query(`
-    select *, (table_2.product_sales - table_2.over_head_costs) AS total_profit from table_2`,
+    SELECT department.*, IFNULL(product_sales,"0") AS product_sales, (IFNULL(product_sales,0) - over_head_costs) AS total_profit
+    FROM  department
+    LEFT JOIN (SELECT department_name, sum(product_sales) AS product_sales FROM products GROUP BY department_name) AS sales 
+    USING (department_name);`,
         function (err, res) {
             if (err) throw err;
             displayTable(res);
         }
     )
 }
+
 
 let chooseTask = function () {
     inq.prompt([{
@@ -152,6 +131,6 @@ connection.connect(function (err) {
     if (err) throw err;
     // chooseTask();
 
-        sumSalesByDepart();
-    
+    sumSalesByDepart();
+
 });
