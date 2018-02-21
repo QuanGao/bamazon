@@ -1,13 +1,13 @@
 # Bamazon
 
 ## An Amazon-like storefront CLI written in Node.js
-* For [customers](#For customers), bamazon will take in your order and return the total price.
-* For the [store manager](#For the manager), bamazon allows you to (1) view the complete inventory or products with low inventory count (2) add more stock to existing products or new products to the inventory
-* For the [store supervisor](#For the supervisor), bamazon presents you with the options of either view sales information by departments or create new departments
+* For [customers](#for-customers), bamazon will take in your order and return the total price.
+* For the [store manager](#for-the-manager), bamazon allows you to (1) view the complete inventory or products with low inventory count (2) add more stock to existing products or new products to the inventory
+* For the [store supervisor](#for-the-supervisor), bamazon presents you with the options of either view sales information by departments or create new departments
 
 ## For customers
 
-#### Bamazon greets with products for sale and returns the total price as you put in order:
+#### Bamazon presents you with our product list and returns the total price as you put in order:
 
 ![customer order productt](./gifs/1.gif)
 
@@ -22,7 +22,7 @@
 ![View inventory](./gifs/3.gif)
 
 #### Restock products. For example, the Pusheen plush stock is low, let's add more!
-Note that after stocking up, it is not in the low inventory table anymore:
+Note that after stocking up, Pusheen is not in the low inventory table anymore 
 
 ![Add more stocks](./gifs/4.gif)
 
