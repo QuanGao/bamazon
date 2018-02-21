@@ -14,12 +14,12 @@ git clone <bamazonRepo>
 ```
 npm install
 ```
-3. Run bamazonSeed.sql to initilalize sql database and populate bamazon database with sample data
-4.
+3. Run bamazonSeeds.sql to initilalize sql database and populate bamazon database with sample data
 
 # Usage
 
 ## For customers
+Run
 ```
 node bamazonCustomer.js
 ```
@@ -32,6 +32,7 @@ node bamazonCustomer.js
 ![Order productt](./gifs/2.gif)
 
 ## For the manager
+Run
 ```
 node bamazonManager.js
 ```
@@ -50,6 +51,7 @@ Note that milk is in the inventory table now.
 ![Add new product](./gifs/5.gif)
 
 ## For the supervisor
+Run
 ```
 node bamazonSupervisor.js
 ```
