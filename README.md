@@ -5,8 +5,24 @@
 * For the [store manager](#for-the-manager), bamazon allows you to (1) view the complete inventory or products with low inventory count (2) add more stock to existing products or new products to the inventory
 * For the [store supervisor](#for-the-supervisor), bamazon presents you with the options of either view sales information by departments or create new departments
 
-## For customers
+# Installation
+1. Clone this repository
+```
+git clone <bamazonRepo>
+```
+2. Navigate to the directory and install dependencies
+```
+npm install
+```
+3. Run bamazonSeed.sql to initilalize sql database and populate bamazon database with sample data
+4.
 
+# Usage
+
+## For customers
+```
+node bamazonCustomer.js
+```
 #### Bamazon presents you with our product list and returns the total price as you put in order:
 
 ![customer order productt](./gifs/1.gif)
@@ -16,7 +32,9 @@
 ![Order productt](./gifs/2.gif)
 
 ## For the manager
-
+```
+node bamazonManager.js
+```
 #### View the complete inventory or items that have low inventory count (less than 5):
 
 ![View inventory](./gifs/3.gif)
@@ -32,7 +50,9 @@ Note that milk is in the inventory table now.
 ![Add new product](./gifs/5.gif)
 
 ## For the supervisor
-
+```
+node bamazonSupervisor.js
+```
 ### View sales by department:
 
 ![View sales](./gifs/6.gif)
