@@ -19,7 +19,7 @@ npm install
 # Usage
 
 ## For customers
-Run
+Run bamazonCustomer.js to start
 ```
 node bamazonCustomer.js
 ```
@@ -32,7 +32,7 @@ node bamazonCustomer.js
 ![Order productt](./gifs/2.gif)
 
 ## For the manager
-Run
+Run bamazonManager.js to start
 ```
 node bamazonManager.js
 ```
@@ -51,7 +51,7 @@ Note that milk is in the inventory table now.
 ![Add new product](./gifs/5.gif)
 
 ## For the supervisor
-Run
+Run bamazonSupervisor.js to start
 ```
 node bamazonSupervisor.js
 ```
