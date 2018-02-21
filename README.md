@@ -1,40 +1,42 @@
-# bamazon
+# Bamazon
 
-## An Amazon-like storefront CLI written in Node.js that
-* For customers, the app will take in your order, return the total price, and deplete stock from the store's inventory.
-* For the store manager, the app allows you to (1) view the complete inventory (2) view products that have low inventory count (3) add more stock to existing products in the inventory (4) add new product to the store
-* For the store supervisor, the app allows you to (1) view sales information for all departments of the store (2) add new department
+## An Amazon-like storefront CLI written in Node.js
+* For [customers](#For customers), bamazon will take in your order and return the total price.
+* For the [store manager](#For the manager), bamazon allows you to (1) view the complete inventory or products with low inventory count (2) add more stock to existing products or new products to the inventory
+* For the [store supervisor](#For the supervisor), bamazon presents you with the options of either view sales information by departments or create new departments
 
-### When customers order products:
+## For customers
 
-##### Bamazon returns the total price:
+#### Bamazon greets with products for sale and returns the total price as you put in order:
 
 ![customer order productt](./gifs/1.gif)
 
-##### Bamazon informs customers if there isn't enough products in stock:
+#### Bamazon regrets to inform you when the desired product is out of stock:
 
-![customer order productt](./gifs/2.gif)
+![Order productt](./gifs/2.gif)
 
-### The manager can choose to:
+## For the manager
 
-##### View the complete inventory or items that have low inventory count:
+#### View the complete inventory or items that have low inventory count (less than 5):
 
-![manager view inventory](./gifs/3.gif)
+![View inventory](./gifs/3.gif)
 
-##### Restock products. For example, Pusheen plush stock is low, let's add more!
+#### Restock products. For example, the Pusheen plush stock is low, let's add more!
 Note that after stocking up, it is not in the low inventory table anymore:
 
-![manager add more stocks](./gifs/4.gif)
+![Add more stocks](./gifs/4.gif)
 
-##### Add new product (milk in this case).
+#### Add new product (milk in this case) in the Food department.
 Note that milk is in the inventory table now.
 
-![manager add new product](./gifs/5.gif)
+![Add new product](./gifs/5.gif)
 
-### The supervisor can either view sales by department:
+## For the supervisor
 
-![supervisor view sales](./gifs/6.gif)
+### View sales by department:
 
-### Or create new department:
+![View sales](./gifs/6.gif)
 
-![supervisoradd new department](./gifs/7.gif)
+### Create new department:
+
+![New department](./gifs/7.gif)
